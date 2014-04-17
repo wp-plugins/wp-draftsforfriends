@@ -3,7 +3,7 @@
 Plugin Name: WP-DraftsForFriends
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Now you don't need to add friends as users to the blog in order to let them preview your drafts. Modified from Drafts for Friends originally by Neville Longbottom.
-Version: 1.0.1
+Version: 1.0.2
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-draftsforfriends
@@ -12,7 +12,7 @@ Text Domain: wp-draftsforfriends
 /**
  * Drafts for Friends version
  */
-define( 'WP_DRAFTSFORFRIENDS_VERSION', '1.0.1' );
+define( 'WP_DRAFTSFORFRIENDS_VERSION', '1.0.2' );
 
 
 /**
@@ -68,15 +68,40 @@ class WPDraftsForFriends	{
 	}
 
 	/**
-	 * Create plugin table when activated
+	 * What to do when the plugin is being activated
 	 *
 	 * @access public
+	 * @param boolean Is the plugin being network activated?
 	 * @return void
 	 */
-	public function plugin_activation() {
+	public function plugin_activation( $network_wide ) {
+		if ( is_multisite() && $network_wide ) {
+			$ms_sites = wp_get_sites();
+
+			if( 0 < sizeof( $ms_sites ) ) {
+				foreach ( $ms_sites as $ms_site ) {
+					switch_to_blog( $ms_site['blog_id'] );
+					$this->plugin_activated();
+				}
+			}
+
+	        restore_current_blog();
+		} else {
+			$this->plugin_activated();
+		}
+	}
+
+	/**
+	 * Create plugin table when activated
+	 *
+	 * @access private
+	 * @return void
+	 */
+	private function plugin_activated() {
 		global $wpdb;
 
-		$create_sql = "CREATE TABLE $wpdb->draftsforfriends (".
+		$draftsforfriends_table = $wpdb->prefix . 'draftsforfriends';
+		$create_sql = "CREATE TABLE $draftsforfriends_table (".
 			'id bigint(20) unsigned NOT NULL AUTO_INCREMENT,'.
 			'post_id bigint(20) unsigned NOT NULL,'.
 			'user_id bigint(20) unsigned NOT NULL,'.
@@ -104,17 +129,17 @@ class WPDraftsForFriends	{
 		if( 'posts_page_wp-draftsforfriends/wp-draftsforfriends' == $hook_suffix ) {
 
 			// Minified CSS/CSS URLs
-			$admin_css_url = 'wp-draftsforfriends/css/draftsforfriends-admin.min.css';
-			$admin_js_url = 'wp-draftsforfriends/js/draftsforfriends-admin.min.js';
+			$admin_css_url = 'css/draftsforfriends-admin.min.css';
+			$admin_js_url = 'js/draftsforfriends-admin.min.js';
 
 			// If WP_DEBUG mode we load non-minified URLs
 			if( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				$admin_css_url = 'wp-draftsforfriends/css/draftsforfriends-admin.css';
-				$admin_js_url = 'wp-draftsforfriends/js/draftsforfriends-admin.js';
+				$admin_css_url = 'css/draftsforfriends-admin.css';
+				$admin_js_url = 'js/draftsforfriends-admin.js';
 			}
 
-			wp_enqueue_style( 'draftsforfriends-admin', plugins_url( $admin_css_url ), false, WP_DRAFTSFORFRIENDS_VERSION, 'all' );
-			wp_enqueue_script( 'draftsforfriends-admin', plugins_url( $admin_js_url ), array( 'jquery', 'jquery-color' ), WP_DRAFTSFORFRIENDS_VERSION, true );
+			wp_enqueue_style( 'draftsforfriends-admin', plugins_url( $admin_css_url, __FILE__ ), false, WP_DRAFTSFORFRIENDS_VERSION );
+			wp_enqueue_script( 'draftsforfriends-admin', plugins_url( $admin_js_url, __FILE__ ), array( 'jquery' ), WP_DRAFTSFORFRIENDS_VERSION, true );
 			wp_localize_script( 'draftsforfriends-admin', 'draftsForFriendsAdminL10n', array(
 				'admin_ajax_url'   => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
 				'confirm_delete'   => __( 'Are you sure you want to delete this shared draft, \'{{post_title}}\'', 'wp-draftsforfriends' ),
