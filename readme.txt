@@ -3,7 +3,7 @@ Contributors: GamerZ
 Donate link: http://lesterchan.net/site/donation/  
 Tags: friends, preview, drafts, send, drafts for friends, share draft, send draft  
 Requires at least: 3.7  
-Tested up to: 4.1  
+Tested up to: 4.2  
 Stable tag: trunk  
 License: GPLv2 or later  
 License URI: http://www.gnu.org/licenses/gpl-2.0.html  
@@ -23,6 +23,9 @@ Modified from Drafts for Friends originally by Neville Longbottom.
 
 = Credits =
 * Plugin icon by [Freepik](http://www.freepik.com) from [Flaticon](http://www.flaticon.com)
+
+= Donations =
+I spent most of my free time creating, updating, maintaining and supporting these plugins, if you really love my plugins and could spare me a couple of bucks, I will really appreciate it. If not feel free to use it without any obligations.
 
 == Changelog ==
 
